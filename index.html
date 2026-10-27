@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>เกมตอบคำถาม: เทคโนโลยีคืออะไร?</title>
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== ปรับแต่งได้ที่นี่ ===== */
+:root{
+  --bg:#FFE9CC;        /* พื้นหลังส้มอ่อน */
+  --card:#FFFFFF;
+  --text:#4A2C12;
+  --accent:#FF8A1F;    /* สีส้มหลัก */
+  --accent-dark:#D96A00;
+  --good:#2E9E5B; --good-bg:#DDF5E6;
+  --bad:#D9822B;  --bad-bg:#FFF0D6;
+  --line:#F3C48F;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#3A2410;--card:#4D3219;--text:#FFF1E0;--accent:#FF9A3C;--accent-dark:#FFB468;
+  --good:#6FD99B;--good-bg:#1F4A33;--bad:#FFC27A;--bad-bg:#5A3B17;--line:#7A5530;}}
+:root[data-theme="dark"]{--bg:#3A2410;--card:#4D3219;--text:#FFF1E0;--accent:#FF9A3C;--accent-dark:#FFB468;--good:#6FD99B;--good-bg:#1F4A33;--bad:#FFC27A;--bad-bg:#5A3B17;--line:#7A5530;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:'Mali','Sarabun','Noto Sans Thai',sans-serif;font-size:18px;line-height:1.5;display:flex;justify-content:center;padding:16px}
+.wrap{width:100%;max-width:720px}
+.card{background:var(--card);border:3px solid var(--line);border-radius:24px;padding:20px;box-shadow:0 6px 0 var(--line)}
+h1{font-size:1.7rem;margin:.2em 0;color:var(--accent-dark)}
+.hidden{display:none!important}
+.cat-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.cat{width:84px;height:84px;flex:none}
+.bubble{background:var(--bg);border:2px solid var(--line);border-radius:18px;padding:10px 14px;flex:1;font-weight:600}
+.btn{font:inherit;font-weight:700;background:var(--accent);color:#fff;border:0;border-radius:16px;padding:12px 24px;cursor:pointer;box-shadow:0 4px 0 var(--accent-dark);font-size:1.1rem}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--accent-dark)}
+.top{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-bottom:8px}
+.pill{background:var(--bg);border:2px solid var(--line);border-radius:999px;padding:2px 14px}
+.timer{height:14px;background:var(--bg);border-radius:99px;overflow:hidden;border:2px solid var(--line);margin-bottom:14px}
+.timer i{display:block;height:100%;width:100%;background:var(--accent);transition:width 1s linear}
+.timer i.low{background:#E5533D}
+.q{font-size:1.25rem;font-weight:700;margin:6px 0 14px}
+.opts{display:grid;gap:10px}
+.opt{font:inherit;text-align:left;background:var(--card);color:var(--text);border:3px solid var(--line);border-radius:16px;padding:12px 16px;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--accent);background:var(--bg)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--good-bg);border-color:var(--good)}
+.opt.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.fb{margin-top:14px;padding:12px 14px;border-radius:16px;font-weight:600}
+.fb.ok{background:var(--good-bg)}.fb.no{background:var(--bad-bg)}
+.fb p{margin:.3em 0 0;font-weight:400}
+.center{text-align:center}
+.big{font-size:3rem;font-weight:700;color:var(--accent-dark)}
+.stars{font-size:2rem;letter-spacing:4px}
+@media (prefers-reduced-motion:no-preference){.bounce{animation:b .5s}@keyframes b{40%{transform:translateY(-12px)}}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- หน้าเริ่มเกม -->
+<section id="start" class="card center">
+  <div class="cat-row" style="justify-content:center"><div class="cat" data-cat></div></div>
+  <h1>🐱 เกมตอบคำถาม: เทคโนโลยีคืออะไร?</h1>
+  <p>ตอบ 10 ข้อ ข้อละ 20 วินาที ถูกได้ 10 คะแนน<br>ตอบผิดไม่เป็นไร! น้องแมวจะช่วยอธิบายให้ 😺</p>
+  <p style="font-size:.95rem">เล่นเพื่อสนุกและเรียนรู้ ไม่มีใครแพ้นะ</p>
+  <button class="btn" id="go">เริ่มเล่นเลย!</button>
+</section>
+
+<!-- หน้าเล่น -->
+<section id="play" class="hidden">
+  <div class="card">
+    <div class="cat-row">
+      <div class="cat" id="catPlay" data-cat></div>
+      <div class="bubble" id="say">พร้อมแล้วไปลุยกัน!</div>
+    </div>
+    <div class="top">
+      <span class="pill" id="num">ข้อ 1/10</span>
+      <span class="pill" id="sec">⏱ 20</span>
+      <span class="pill" id="score">⭐ 0</span>
+    </div>
+    <div class="timer"><i id="bar"></i></div>
+    <div class="q" id="q"></div>
+    <div class="opts" id="opts"></div>
+    <div id="fb" class="fb hidden" aria-live="polite"></div>
+    <div class="center" style="margin-top:14px"><button class="btn hidden" id="next">ข้อต่อไป ➜</button></div>
+  </div>
+</section>
+
+<!-- หน้าสรุป -->
+<section id="end" class="card center hidden">
+  <div class="cat-row" style="justify-content:center"><div class="cat" id="catEnd" data-cat></div></div>
+  <h1>เก่งมาก! จบเกมแล้ว 🎉</h1>
+  <div class="big" id="final"></div>
+  <div class="stars" id="stars"></div>
+  <p id="msg"></p>
+  <button class="btn" id="again">เล่นอีกรอบ</button>
+</section>
+
+</div>
+
+<script>
+/* ===== คำถาม (แก้ไขได้) : a = ข้อที่ถูก (เริ่มที่ 0) ===== */
+const QUESTIONS = [
+ {q:"เทคโนโลยีคืออะไร?",c:["สิ่งที่มนุษย์คิดค้นหรือพัฒนาขึ้นเพื่อช่วยให้ชีวิตง่ายขึ้น","เฉพาะคอมพิวเตอร์เท่านั้น","สิ่งที่เกิดขึ้นเองตามธรรมชาติ","ของเล่นสำหรับเด็ก"],a:0,e:"เทคโนโลยีคือความรู้และเครื่องมือที่คนสร้างขึ้นมาแก้ปัญหา ตั้งแต่ไม้ขีดไฟยันสมาร์ตโฟนเลย!"},
+ {q:"ข้อไหนช่วยให้เราสื่อสารกับเพื่อนที่อยู่ไกลกันได้?",c:["ไม้บรรทัด","โทรศัพท์มือถือ","ยางลบ","ไม้กวาด"],a:1,e:"โทรศัพท์มือถือเป็นเทคโนโลยีการสื่อสาร ช่วยให้คุยกันได้แม้อยู่คนละจังหวัดหรือคนละประเทศ"},
+ {q:"มนุษย์ยุคแรกใช้เทคโนโลยีอะไรทำให้อาหารสุก และให้ความอบอุ่น?",c:["ไมโครเวฟ","เตาแก๊ส","ไฟ","เตาอบไฟฟ้า"],a:2,e:"การควบคุมไฟเป็นเทคโนโลยียุคแรก ๆ ที่เปลี่ยนชีวิตมนุษย์ ใช้ทั้งทำอาหาร ให้แสง และกันสัตว์ร้าย"},
+ {q:"เทคโนโลยีสารสนเทศ (IT) เกี่ยวข้องกับเรื่องอะไรมากที่สุด?",c:["การปลูกต้นไม้","การเก็บ จัดการ และส่งต่อข้อมูล","การทำขนม","การก่อสร้างบ้าน"],a:1,e:"IT คือการใช้คอมพิวเตอร์และเครือข่ายมาเก็บ ค้นหา ประมวลผล และส่งข้อมูลให้เราใช้งานได้สะดวก"},
+ {q:"ข้อไหนเป็น “ฮาร์ดแวร์” (ส่วนที่จับต้องได้ของคอมพิวเตอร์)?",c:["โปรแกรมเกม","เมาส์","แอปแชต","ไฟล์รูปภาพ"],a:1,e:"ฮาร์ดแวร์คือชิ้นส่วนที่จับต้องได้ เช่น เมาส์ คีย์บอร์ด จอภาพ ส่วนโปรแกรมและแอปเป็นซอฟต์แวร์"},
+ {q:"อินเทอร์เน็ตคืออะไร?",c:["เครือข่ายที่เชื่อมคอมพิวเตอร์และอุปกรณ์ทั่วโลกเข้าด้วยกัน","เครื่องพิมพ์ชนิดหนึ่ง","แบตเตอรี่ของโทรศัพท์","เกมออนไลน์เกมเดียว"],a:0,e:"อินเทอร์เน็ตเหมือนใยแมงมุมยักษ์ที่เชื่อมอุปกรณ์ทั่วโลก ทำให้ส่งข้อมูล ดูวิดีโอ และเรียนออนไลน์ได้"},
+ {q:"AI ย่อมาจากอะไร?",c:["Auto Internet","Artificial Intelligence","Awesome Idea","All Information"],a:1,e:"AI = Artificial Intelligence แปลว่าปัญญาประดิษฐ์ คือระบบที่ทำให้คอมพิวเตอร์เรียนรู้และตัดสินใจคล้ายคนได้บางอย่าง"},
+ {q:"ข้อไหนคือวิธีใช้เทคโนโลยีอย่างปลอดภัย?",c:["บอกรหัสผ่านให้เพื่อนสนิททุกคน","กดลิงก์แปลก ๆ ที่ส่งมา","ตั้งรหัสผ่านให้เดายากและไม่บอกใคร","โพสต์ที่อยู่บ้านให้คนทั่วไปรู้"],a:2,e:"รหัสผ่านคือกุญแจของเรา ควรตั้งให้เดายาก ไม่บอกใคร และระวังลิงก์แปลก ๆ เพราะอาจเป็นการหลอกลวง"},
+ {q:"ข้อไหนคือตัวอย่างเทคโนโลยีที่ช่วยประหยัดแรงงาน?",c:["เครื่องซักผ้า","ก้อนหินริมทาง","เมฆบนฟ้า","ลมพัด"],a:0,e:"เครื่องซักผ้าช่วยซักแทนมือ ประหยัดเวลาและแรง เป็นเทคโนโลยีที่ใช้ในบ้านเรา"},
+ {q:"ข้อไหนคือการใช้เทคโนโลยีอย่างสร้างสรรค์?",c:["ใช้โทรศัพท์ค้นคว้าทำการบ้าน","แกล้งเพื่อนในแชต","เล่นเกมทั้งคืนจนไม่ได้นอน","แชร์ข่าวโดยไม่ตรวจสอบ"],a:0,e:"เทคโนโลยีเป็นเครื่องมือที่ดีมาก ถ้าใช้เพื่อเรียนรู้และช่วยเหลือผู้อื่น และอย่าลืมพักสายตากับนอนให้พอด้วยนะ"}
+];
+const TIME=20, PTS=10;
+const MOODS={
+ happy:'<path d="M34 56 Q42 66 50 56" fill="none" stroke="#4A2C12" stroke-width="3" stroke-linecap="round"/><path d="M50 56 Q58 66 66 56" fill="none" stroke="#4A2C12" stroke-width="3" stroke-linecap="round"/>',
+ hmm:'<path d="M38 62 Q50 58 62 62" fill="none" stroke="#4A2C12" stroke-width="3" stroke-linecap="round"/>',
+ cheer:'<path d="M36 58 Q50 74 64 58 Z" fill="#E5533D" stroke="#4A2C12" stroke-width="3" stroke-linejoin="round"/>'
+};
+function catSVG(m){return `<svg viewBox="0 0 100 100" role="img" aria-label="น้องแมวการ์ตูน"><polygon points="14,40 18,8 42,26" fill="#FF9F3D" stroke="#4A2C12" stroke-width="3" stroke-linejoin="round"/><polygon points="86,40 82,8 58,26" fill="#FF9F3D" stroke="#4A2C12" stroke-width="3" stroke-linejoin="round"/><polygon points="21,30 22,16 33,26" fill="#FFC9C9"/><polygon points="79,30 78,16 67,26" fill="#FFC9C9"/><ellipse cx="50" cy="56" rx="38" ry="34" fill="#FFB75E" stroke="#4A2C12" stroke-width="3"/><path d="M42 24 L44 34 M50 22 L50 33 M58 24 L56 34" stroke="#D96A00" stroke-width="3" stroke-linecap="round"/><ellipse cx="36" cy="46" rx="5" ry="6.5" fill="#4A2C12"/><ellipse cx="64" cy="46" rx="5" ry="6.5" fill="#4A2C12"/><circle cx="38" cy="44" r="2" fill="#fff"/><circle cx="66" cy="44" r="2" fill="#fff"/><polygon points="46,53 54,53 50,58" fill="#FF7A8A"/>${MOODS[m]||MOODS.happy}<path d="M6 54 L26 58 M6 66 L26 62 M94 54 L74 58 M94 66 L74 62" stroke="#4A2C12" stroke-width="2" stroke-linecap="round"/></svg>`}
+function setCat(el,m){el.innerHTML=catSVG(m)}
+
+const $=id=>document.getElementById(id);
+let order,i,score,timer,left,locked,startedAt;
+const CHEER=["เยี่ยมไปเลย! 🎉","ใช่แล้ว! เก่งมาก ⭐","สุดยอด! ไปต่อกัน 🚀","ถูกต้อง! น้องแมวภูมิใจ 😻"];
+const SOFT=["ไม่เป็นไรนะ ลองดูเฉลยกัน 😺","พลาดนิดเดียว เรียนรู้ไปด้วยกัน 💪","ข้อนี้ยากหน่อย เดี๋ยวเรารู้แล้ว!","ผิดได้ ลองใหม่ข้อถัดไปนะ 🌟"];
+const rnd=a=>a[Math.floor(Math.random()*a.length)];
+document.querySelectorAll('[data-cat]').forEach(e=>setCat(e,'happy'));
+
+function show(id){["start","play","end"].forEach(s=>$(s).classList.toggle("hidden",s!==id))}
+function begin(){i=0;score=0;show("play");load()}
+function load(){
+  locked=false;const Q=QUESTIONS[i];
+  $("num").textContent=`ข้อ ${i+1}/${QUESTIONS.length}`;$("score").textContent="⭐ "+score;
+  $("q").textContent=Q.q;$("fb").classList.add("hidden");$("next").classList.add("hidden");
+  setCat($("catPlay"),"happy");$("say").textContent=i===0?"พร้อมแล้วไปลุยกัน!":"ข้อใหม่มาแล้ว ลองคิดดูนะ";
+  const idx=Q.c.map((_,k)=>k).sort(()=>Math.random()-.5);
+  $("opts").innerHTML="";
+  idx.forEach(k=>{const b=document.createElement("button");b.className="opt";b.textContent=Q.c[k];b.onclick=()=>pick(b,k);b.dataset.k=k;$("opts").appendChild(b)});
+  left=TIME;tick(true);clearInterval(timer);
+  timer=setInterval(()=>{left--;tick();if(left<=0){clearInterval(timer);finish(-1)}},1000);
+}
+function tick(first){
+  $("sec").textContent="⏱ "+Math.max(left,0);
+  const bar=$("bar");
+  if(first){bar.style.transition="none";bar.style.width="100%";void bar.offsetWidth;bar.style.transition="";}
+  bar.style.width=(Math.max(left,0)/TIME*100)+"%";bar.classList.toggle("low",left<=5);
+}
+function pick(btn,k){if(locked)return;clearInterval(timer);finish(k)}
+function finish(k){
+  locked=true;const Q=QUESTIONS[i];const ok=k===Q.a;
+  document.querySelectorAll(".opt").forEach(b=>{b.disabled=true;const v=+b.dataset.k;if(v===Q.a)b.classList.add("right");else if(v===k)b.classList.add("wrong")});
+  const fb=$("fb");fb.classList.remove("hidden","ok","no");
+  if(ok){score+=PTS;fb.classList.add("ok");fb.innerHTML=`<b>✅ ${rnd(CHEER)} +${PTS} คะแนน</b><p>${Q.e}</p>`;setCat($("catPlay"),"cheer");$("say").textContent=rnd(CHEER);$("catPlay").classList.add("bounce");setTimeout(()=>$("catPlay").classList.remove("bounce"),600)}
+  else{fb.classList.add("no");const t=k===-1?"หมดเวลาแล้ว ไม่เป็นไรนะ! ":"";fb.innerHTML=`<b>💡 ${t}${rnd(SOFT)}</b><p>คำตอบที่ถูกคือ “${Q.c[Q.a]}”<br>${Q.e}</p>`;setCat($("catPlay"),"hmm");$("say").textContent="ไม่เป็นไร เรียนรู้ไปด้วยกัน!"}
+  $("score").textContent="⭐ "+score;
+  $("next").textContent=i===QUESTIONS.length-1?"ดูผลลัพธ์ 🎁":"ข้อต่อไป ➜";$("next").classList.remove("hidden");$("next").focus();
+}
+function nextQ(){if(i<QUESTIONS.length-1){i++;load()}else end()}
+function end(){
+  show("end");const max=QUESTIONS.length*PTS;$("final").textContent=`${score} / ${max}`;
+  const r=score/max;$("stars").textContent=r>=.8?"⭐⭐⭐":r>=.5?"⭐⭐":"⭐";
+  $("msg").textContent=r>=.8?"สุดยอด! คุณเข้าใจเทคโนโลยีดีมากเลย 🏆":r>=.5?"เก่งมาก! เรียนรู้ได้เยอะเลยนะ ลองเล่นอีกรอบเพื่อเก็บให้ครบ 💪":"ขอบคุณที่ลองเล่นนะ! วันนี้ได้เรียนรู้ของใหม่เพียบ เล่นอีกรอบแล้วจะเก่งขึ้นแน่นอน 🌈";
+  setCat($("catEnd"),"cheer");
+}
+$("go").onclick=begin;$("again").onclick=begin;$("next").onclick=nextQ;
+</script>
+</body>
+</html>
